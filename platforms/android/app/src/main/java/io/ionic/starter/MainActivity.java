@@ -19,14 +19,22 @@
 
 package io.ionic.starter;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+
 import org.apache.cordova.*;
 
-public class MainActivity extends CordovaActivity
-{
+public class MainActivity extends CordovaActivity {
+
+    private Intent websocketIntent = null;
+    public static String CHANNEL_ID = "familycarechannel";
+
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // enable Cordova apps to be started in the background
@@ -37,5 +45,40 @@ public class MainActivity extends CordovaActivity
 
         // Set by <content src="index.html" /> in config.xml
         loadUrl(launchUrl);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel();
+        }
+        startWebSocketService();
+
+
+    }
+
+    private void startWebSocketService() {
+        // mySharedPreferences.putBoolean(Utilities.IS_SERVICE_DESTROYED, false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            websocketIntent = new Intent(this, WebSocketService.class);
+            //websocketIntent.putExtra(Utilities.PATIENT_ID, mySharedPreferences.getInt(Utilities.PATIENT_ID));
+            ContextCompat.startForegroundService(this, websocketIntent);
+
+
+        } else {
+            websocketIntent = new Intent(this, WebSocketService.class);
+            //websocketIntent.putExtra(Utilities.PATIENT_ID, mySharedPreferences.getInt(Utilities.PATIENT_ID));
+            startService(websocketIntent);
+        }
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel serviceChannel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Example Service Channel",
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
+
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(serviceChannel);
+        }
     }
 }

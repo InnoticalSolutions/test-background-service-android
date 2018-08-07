@@ -1,4 +1,4 @@
-package cordova.plugins.BackgroundServiceAndroid;
+package com.amankumar.cordova.BackgroundServiceAndroid;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
@@ -9,8 +9,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import org.apache.cordova.CordovaWebView;
-import cordova.plugins.BackgroundServiceAndroid.MyService;
+
+import com.amankumar.cordova.MyService.MyService;
+
 import android.util.Log;
+
+import io.ionic.starter.WebSocketService;
 
 /**
  * This class echoes a string called from JavaScript.
@@ -19,20 +23,28 @@ import android.util.Log;
 public class BackgroundServiceAndroid extends CordovaPlugin {
 
     private static final String TAG = "BackgroundService";
-	public static CordovaWebView gWebView;
+    public static CordovaWebView gWebView;
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
         Log.d(TAG, "in initialize");
         // your init code here
-		gWebView = webView;
+        gWebView = webView;
         MyService.gWebView = webView;
     }
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals("echo")) {
+            String message = args.getString(0);
+            this.echo(message, callbackContext);
+            return true;
+        }else if (action.equals("login")){
+            String message = args.getString(0);
+            this.echo(message, callbackContext);
+            return true;
+        }else if (action.equals("logout")){
             String message = args.getString(0);
             this.echo(message, callbackContext);
             return true;
@@ -45,6 +57,7 @@ public class BackgroundServiceAndroid extends CordovaPlugin {
 
         if (message != null && message.length() > 0) {
             callbackContext.success(message);
+            WebSocketService.sendMessageIntoSocket(message);
         } else {
             callbackContext.error("Expected one non-empty string argument.");
         }
